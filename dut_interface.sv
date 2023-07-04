@@ -1,3 +1,4 @@
+
 interface synch_fifo(); //interface of synchronous fifo
   logic clk,rst,wr_en,rd_en,empty,full;
   logic [7:0] wr_data;
@@ -9,7 +10,7 @@ endinterface
 
 module fifo(synch_fifo.rtl inf); // design block
   
-  bit [3:0] wr_ptr = 0,rd_ptr = 0,cnt = 0;
+  bit [3:0] wr_ptr,rd_ptr,cnt;
   bit [7:0] fifo_mem [15:0];
   
   always@(posedge inf.clk)
@@ -24,7 +25,7 @@ module fifo(synch_fifo.rtl inf); // design block
       //when write enabe and memory does not full
       else if(inf.wr_en && !inf.full)   
           begin
-            if(cnt < 15) begin
+            if(cnt < 16) begin
               fifo_mem[wr_ptr] <= inf.wr_data;
             wr_ptr <= wr_ptr + 1;
             cnt <= cnt + 1;
@@ -41,10 +42,10 @@ module fifo(synch_fifo.rtl inf); // design block
           end
         end 
       // when write pointer reach to last memory location
-      if(wr_ptr == 15)
+      if(wr_ptr == 16)
          wr_ptr <= 0;
       // when read pointer reach to last memory location
-      if(rd_ptr == 15)
+      if(rd_ptr == 16)
          rd_ptr <= 0;
     end
   
