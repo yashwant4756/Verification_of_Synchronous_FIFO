@@ -1,3 +1,9 @@
+class random;
+  rand bit wr_en;
+  rand bit rd_en;
+  rand bit [7:0] wr_data;
+endclass
+
 module testbench(synch_fifo.tb inf); // testbench of synchronous fifo
   initial begin
    inf.clk = 0;
@@ -55,32 +61,38 @@ module testbench(synch_fifo.tb inf); // testbench of synchronous fifo
      bins high = {[170:255]};
    }
   // cross coverage
-  cross_wr_enXwr_data: cross inf.wr_en,inf.wr_data;
-  cross_rd_enXrd_data: cross inf.rd_en,inf.rd_data;
+    cross_wr_enXwr_data: cross inf.wr_en,inf.wr_data{
+      ignore_bins unused_wr_en=binsof(inf.wr_en) intersect{0};} 
+    cross_rd_enXrd_data: cross inf.rd_en,inf.rd_data{
+      ignore_bins unused_rd_en=binsof(inf.rd_en) intersect{0};}
   
  endgroup
   
   c ci;  // instantiation of covergroup 
+  random r;
   
   task write();
+    r=new();
     for(int i = 0; i < 20; i++) begin
-      @(posedge inf.clk);   
+        @(posedge inf.clk);
+      r.randomize();
     inf.wr_en = 1'b1;
     inf.rd_en = 1'b0;
-      inf.wr_data = $urandom();   // unsigned randomisation of wr_data
+        if(!inf.full) begin
+    inf.wr_data = r.wr_data;  
         $display("--------------------------------------------------");
       $display("The value of write data is %0d when wr_en=%0d and rd_en=%0d",inf.wr_data,inf.wr_en,inf.rd_en);
         //$display("--------------------------------------------------");
+      end
    end  
   endtask
   
     task read();
       for(int i = 0; i < 20; i++) begin
-        @(posedge inf.clk);   
-    inf.wr_en = 1'b0;
-    inf.rd_en = 1'b1;
-    inf.wr_data = 0;
-        #20;
+        @(posedge inf.clk); 
+        inf.wr_en = 1'b0;
+        inf.rd_en = 1'b1;
+        inf.wr_data=0;
           $display("--------------------------------------------------");
         $display("The value of read data is %0d when wr_en=%0d and rd_en=%0d",inf.rd_data,inf.wr_en,inf.rd_en);
          // $display("--------------------------------------------------");
@@ -89,20 +101,20 @@ module testbench(synch_fifo.tb inf); // testbench of synchronous fifo
   
   
   initial begin
-  inf.rst = 1'b1;
+    inf.rst = 1'b1;
     #50;
   inf.rst = 0;
   inf.wr_en = 0;
   inf.rd_en= 0;
   #20;
     write(); 
-   #30;
+   #10;
     read(); 
-   #30; 
+   #10; 
   end
   
   initial begin
-    ci = new(); 
+    ci = new();
     $display("--------------------------------------------------");
     $display("Coverage of Synchronous fifo is %0f",ci.get_coverage());
     $display("--------------------------------------------------");
@@ -117,4 +129,5 @@ module top_module();  // top level module
   synch_fifo utt();
   fifo dut(utt);
   testbench test(utt);
+  
 endmodule
