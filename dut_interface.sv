@@ -45,7 +45,7 @@ module fifo(synch_fifo.rtl inf); // design block
       if(wr_ptr == 15)
          wr_ptr <= 0;
       // when read pointer reach to last memory location
-      if(rd_ptr == 16)
+      if(rd_ptr == 15)
          rd_ptr <= 0;
     end
   
