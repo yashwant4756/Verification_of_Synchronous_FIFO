@@ -25,7 +25,7 @@ module fifo(synch_fifo.rtl inf); // design block
       //when write enabe and memory does not full
       else if(inf.wr_en && !inf.full)   
           begin
-            if(cnt < 16) begin
+            if(cnt < 15) begin
               fifo_mem[wr_ptr] <= inf.wr_data;
             wr_ptr <= wr_ptr + 1;
             cnt <= cnt + 1;
@@ -42,7 +42,7 @@ module fifo(synch_fifo.rtl inf); // design block
           end
         end 
       // when write pointer reach to last memory location
-      if(wr_ptr == 16)
+      if(wr_ptr == 15)
          wr_ptr <= 0;
       // when read pointer reach to last memory location
       if(rd_ptr == 16)
